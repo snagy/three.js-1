@@ -1890,6 +1890,7 @@ function WebGLRenderer( parameters = {} ) {
 			}
 
 		}
+
 	};
 
 	this.setRenderTargetFramebuffer = function ( renderTarget, defaultFramebuffer ) {
