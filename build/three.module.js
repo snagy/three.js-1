@@ -23875,11 +23875,11 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		if ( renderTarget.depthTexture.image.depth != 1 ) {
 
-			setTexture2DArray( renderTarget.depthTexture, 0 );
+			this.setTexture2DArray( renderTarget.depthTexture, 0 );
 
 		} else {
 
-			setTexture2D( renderTarget.depthTexture, 0 );
+			this.setTexture2D( renderTarget.depthTexture, 0 );
 
 		}
 
@@ -23967,7 +23967,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 			if ( isCube ) throw new Error( 'target.depthTexture not supported in Cube render targets' );
 
-			setupDepthTexture( renderTargetProperties.__webglFramebuffer, renderTarget );
+			this.setupDepthTexture( renderTargetProperties.__webglFramebuffer, renderTarget );
 
 		} else {
 
@@ -24004,13 +24004,13 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		if ( colorTexture !== undefined ) {
 
-			setupFrameBufferTexture( renderTargetProperties.__webglFramebuffer, renderTarget, renderTarget.texture, 36064, 3553 );
+			this.setupFrameBufferTexture( renderTargetProperties.__webglFramebuffer, renderTarget, renderTarget.texture, 36064, 3553 );
 
 		}
 
 		if ( depthTexture !== undefined ) {
 
-			setupDepthRenderbuffer( renderTarget );
+			this.setupDepthRenderbuffer( renderTarget );
 
 		}
 
@@ -24201,7 +24201,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		if ( renderTarget.depthBuffer || renderTarget.isWebGLMultiviewRenderTarget === true ) {
 
-			setupDepthRenderbuffer( renderTarget );
+			this.setupDepthRenderbuffer( renderTarget );
 
 		}
 
@@ -24386,6 +24386,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 	this.setupRenderTarget = setupRenderTarget;
 	this.updateRenderTargetMipmap = updateRenderTargetMipmap;
 	this.updateMultisampleRenderTarget = updateMultisampleRenderTarget;
+	this.setupDepthTexture = setupDepthTexture;
 	this.setupDepthRenderbuffer = setupDepthRenderbuffer;
 	this.setupFrameBufferTexture = setupFrameBufferTexture;
 	this.useMultisampledRTT = useMultisampledRTT;
@@ -28302,6 +28303,18 @@ function WebGLRenderer( parameters = {} ) {
 
 		renderTargetProperties.__autoAllocateDepthBuffer = depthTexture === undefined;
 
+		if ( ! renderTargetProperties.__autoAllocateDepthBuffer && ! _currentRenderTarget.isWebGLMultiviewRenderTarget ) {
+
+			// The multisample_render_to_texture extension doesn't work properly if there
+			// are midframe flushes and an external depth buffer. Disable use of the extension.
+			if ( extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true ) {
+
+				console.warn( 'THREE.WebGLRenderer: Render-to-texture extension was disabled because an external texture was provided' );
+				renderTargetProperties.__useRenderToTexture = false;
+
+			}
+
+		}
 	};
 
 	this.setRenderTargetFramebuffer = function ( renderTarget, defaultFramebuffer ) {
