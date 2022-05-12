@@ -17496,12 +17496,15 @@
 				if (depthTexture && depthTexture.isDepthTexture) {
 					if (depthTexture.type === FloatType) {
 						glInternalFormat = _gl.DEPTH_COMPONENT32F;
-					} else if (depthTexture.type === UnsignedIntType) {
-						glInternalFormat = _gl.DEPTH_COMPONENT24;
 					} else if (depthTexture.type === UnsignedInt248Type) {
 						glInternalFormat = _gl.DEPTH24_STENCIL8;
 						glDepthAttachment = _gl.DEPTH_STENCIL_ATTACHMENT;
-					}
+					} // we're defaulting to _gl.DEPTH_COMPONENT24 so don't assign here
+					// or else DeepScan will complain
+					// else if ( depthTexture.type === UnsignedIntType ) {
+					// 	glInternalFormat = _gl.DEPTH_COMPONENT24;
+					// }
+
 				}
 
 				let depthStencilTexture = properties.get(renderTarget.depthTexture).__webglTexture;
@@ -35679,3 +35682,4 @@
 	Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhyZWUuanMiLCJzb3VyY2VzIjpbXSwic291cmNlc0NvbnRlbnQiOltdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiIn0=

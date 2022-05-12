@@ -1348,16 +1348,21 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 					glInternalFormat = _gl.DEPTH_COMPONENT32F;
 
-				} else if ( depthTexture.type === UnsignedIntType ) {
-
-					glInternalFormat = _gl.DEPTH_COMPONENT24;
-
 				} else if ( depthTexture.type === UnsignedInt248Type ) {
 
 					glInternalFormat = _gl.DEPTH24_STENCIL8;
 					glDepthAttachment = _gl.DEPTH_STENCIL_ATTACHMENT;
 
 				}
+
+				// we're defaulting to _gl.DEPTH_COMPONENT24 so don't assign here
+				// or else DeepScan will complain
+
+				// else if ( depthTexture.type === UnsignedIntType ) {
+
+				// 	glInternalFormat = _gl.DEPTH_COMPONENT24;
+
+				// }
 
 			}
 

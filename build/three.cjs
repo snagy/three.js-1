@@ -17494,12 +17494,15 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
 			if (depthTexture && depthTexture.isDepthTexture) {
 				if (depthTexture.type === FloatType) {
 					glInternalFormat = _gl.DEPTH_COMPONENT32F;
-				} else if (depthTexture.type === UnsignedIntType) {
-					glInternalFormat = _gl.DEPTH_COMPONENT24;
 				} else if (depthTexture.type === UnsignedInt248Type) {
 					glInternalFormat = _gl.DEPTH24_STENCIL8;
 					glDepthAttachment = _gl.DEPTH_STENCIL_ATTACHMENT;
-				}
+				} // we're defaulting to _gl.DEPTH_COMPONENT24 so don't assign here
+				// or else DeepScan will complain
+				// else if ( depthTexture.type === UnsignedIntType ) {
+				// 	glInternalFormat = _gl.DEPTH_COMPONENT24;
+				// }
+
 			}
 
 			let depthStencilTexture = properties.get(renderTarget.depthTexture).__webglTexture;
@@ -35673,3 +35676,4 @@ exports.ZeroSlopeEnding = ZeroSlopeEnding;
 exports.ZeroStencilOp = ZeroStencilOp;
 exports._SRGBAFormat = _SRGBAFormat;
 exports.sRGBEncoding = sRGBEncoding;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhyZWUuY2pzIiwic291cmNlcyI6W10sInNvdXJjZXNDb250ZW50IjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiJ9

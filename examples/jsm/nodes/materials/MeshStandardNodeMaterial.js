@@ -57,7 +57,7 @@ export default class MeshStandardNodeMaterial extends NodeMaterial {
 
 		if ( this.lightsNode ) builder.lightsNode = this.lightsNode;
 
-		const materialLightsNode = [];
+		let materialLightsNode = [];
 
 		if ( envNode ) {
 
