@@ -18672,7 +18672,7 @@
 
 						scope.isMultiview = useMultiview && extensions.has('OCULUS_multiview');
 						const projectionlayerInit = {
-							colorFormat: renderer.outputEncoding === sRGBEncoding ? gl.SRGB8_ALPHA8 : gl.RGBA8,
+							colorFormat: gl.RGBA8,
 							depthFormat: glDepthFormat,
 							scaleFactor: framebufferScaleFactor
 						};

@@ -25412,7 +25412,7 @@ class WebXRManager extends EventDispatcher {
 					scope.isMultiview = useMultiview && extensions.has( 'OCULUS_multiview' );
 
 					const projectionlayerInit = {
-						colorFormat: ( renderer.outputEncoding === sRGBEncoding ) ? 35907 : 32856,
+						colorFormat: 32856,
 						depthFormat: glDepthFormat,
 						scaleFactor: framebufferScaleFactor
 					};
