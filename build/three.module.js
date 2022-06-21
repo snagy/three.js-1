@@ -28453,7 +28453,8 @@ function WebGLRenderer( parameters = {} ) {
 
 				needsProgramChange = true;
 
-			} else if ( materialProperties.numMultiviewViews !== numMultiviewViews ) {
+			} else if ( !(!materialProperties.numMultiViews && !numMultiviewViews) &&
+						 materialProperties.numMultiviewViews !== numMultiviewViews ) {
 
 				needsProgramChange = true;
 
