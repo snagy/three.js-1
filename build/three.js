@@ -20371,6 +20371,7 @@
 			materialProperties.vertexAlphas = parameters.vertexAlphas;
 			materialProperties.vertexTangents = parameters.vertexTangents;
 			materialProperties.toneMapping = parameters.toneMapping;
+			materialProperties.numMultiviewViews = parameters.numMultiviewViews;
 		}
 
 		function setProgram(camera, scene, geometry, material, object) {
@@ -20439,7 +20440,7 @@
 					needsProgramChange = true;
 				} else if (capabilities.isWebGL2 === true && materialProperties.morphTargetsCount !== morphTargetsCount) {
 					needsProgramChange = true;
-				} else if (!(!materialProperties.numMultiViews && !numMultiviewViews) && materialProperties.numMultiviewViews !== numMultiviewViews) {
+				} else if (materialProperties.numMultiviewViews !== numMultiviewViews) {
 					needsProgramChange = true;
 				}
 			} else {

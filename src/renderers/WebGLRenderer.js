@@ -1464,6 +1464,7 @@ function WebGLRenderer( parameters = {} ) {
 		materialProperties.vertexAlphas = parameters.vertexAlphas;
 		materialProperties.vertexTangents = parameters.vertexTangents;
 		materialProperties.toneMapping = parameters.toneMapping;
+		materialProperties.numMultiviewViews = parameters.numMultiviewViews;
 
 	}
 
@@ -1581,7 +1582,7 @@ function WebGLRenderer( parameters = {} ) {
 
 				needsProgramChange = true;
 
-			} else if ( (materialProperties.numMultiviewViews || 0) !== numMultiviewViews ) {
+			} else if ( materialProperties.numMultiviewViews !== numMultiviewViews ) {
 
 				needsProgramChange = true;
 
