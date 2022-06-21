@@ -20437,7 +20437,7 @@ function WebGLRenderer(parameters = {}) {
 				needsProgramChange = true;
 			} else if (capabilities.isWebGL2 === true && materialProperties.morphTargetsCount !== morphTargetsCount) {
 				needsProgramChange = true;
-			} else if (materialProperties.numMultiviewViews !== numMultiviewViews) {
+			} else if (!(!materialProperties.numMultiViews && !numMultiviewViews) && materialProperties.numMultiviewViews !== numMultiviewViews) {
 				needsProgramChange = true;
 			}
 		} else {
