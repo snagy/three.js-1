@@ -3726,7 +3726,6 @@ class GLTFParser {
 				if ( node === undefined ) continue;
 
 				node.updateMatrix();
-				node.matrixAutoUpdate = true;
 
 				let TypedKeyframeTrack;
 
