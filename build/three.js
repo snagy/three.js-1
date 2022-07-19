@@ -16288,6 +16288,30 @@
 			}
 		}
 
+		function bindTextureToSlot(webglSlot, webglType, webglTexture) {
+			if (webglSlot === undefined) webglSlot = gl.TEXTURE0 + maxTextures - 1;
+			let boundTexture = currentBoundTextures[webglSlot];
+
+			if (boundTexture === undefined) {
+				boundTexture = {
+					type: undefined,
+					texture: undefined
+				};
+				currentBoundTextures[webglSlot] = boundTexture;
+			}
+
+			if (boundTexture.type !== webglType || boundTexture.texture !== webglTexture) {
+				if (currentTextureSlot !== webglSlot) {
+					gl.activeTexture(webglSlot);
+					currentTextureSlot = webglSlot;
+				}
+
+				gl.bindTexture(webglType, webglTexture || emptyTextures[webglType]);
+				boundTexture.type = webglType;
+				boundTexture.texture = webglTexture;
+			}
+		}
+
 		function unbindTexture() {
 			const boundTexture = currentBoundTextures[currentTextureSlot];
 
@@ -16490,6 +16514,7 @@
 			setScissorTest: setScissorTest,
 			activeTexture: activeTexture,
 			bindTexture: bindTexture,
+			bindTextureToSlot: bindTextureToSlot,
 			unbindTexture: unbindTexture,
 			compressedTexImage2D: compressedTexImage2D,
 			texImage2D: texImage2D,
@@ -20892,12 +20917,12 @@
 			uniforms.spotLights.needsUpdate = value;
 			uniforms.spotLightShadows.needsUpdate = value;
 			uniforms.rectAreaLights.needsUpdate = value;
-			uniforms.hemisphereLights.needsUpdate = value;
-			uniforms.directionalShadowMap.needsUpdate = value;
-			uniforms.directionalShadowMatrix.needsUpdate = value;
-			uniforms.spotShadowMap.needsUpdate = value;
-			uniforms.spotShadowMatrix.needsUpdate = value;
-			uniforms.pointShadowMap.needsUpdate = value;
+			uniforms.hemisphereLights.needsUpdate = value; // uniforms.directionalShadowMap.needsUpdate = value;
+
+			uniforms.directionalShadowMatrix.needsUpdate = value; // uniforms.spotShadowMap.needsUpdate = value;
+
+			uniforms.spotShadowMatrix.needsUpdate = value; // uniforms.pointShadowMap.needsUpdate = value;
+
 			uniforms.pointShadowMatrix.needsUpdate = value;
 		}
 
