@@ -22085,6 +22085,37 @@ function WebGLState( gl, extensions, capabilities ) {
 
 	}
 
+	function bindTextureToSlot( webglSlot, webglType, webglTexture ) {
+
+		if ( webglSlot === undefined ) webglSlot = 33984 + maxTextures - 1;
+
+		let boundTexture = currentBoundTextures[ webglSlot ];
+
+		if ( boundTexture === undefined ) {
+
+			boundTexture = { type: undefined, texture: undefined };
+			currentBoundTextures[ webglSlot ] = boundTexture;
+
+		}
+
+		if ( boundTexture.type !== webglType || boundTexture.texture !== webglTexture ) {
+
+			if ( currentTextureSlot !== webglSlot ) {
+
+				gl.activeTexture( webglSlot );
+				currentTextureSlot = webglSlot;
+
+			}
+
+			gl.bindTexture( webglType, webglTexture || emptyTextures[ webglType ] );
+
+			boundTexture.type = webglType;
+			boundTexture.texture = webglTexture;
+
+		}
+
+	}
+
 	function unbindTexture() {
 
 		const boundTexture = currentBoundTextures[ currentTextureSlot ];
@@ -22358,6 +22389,7 @@ function WebGLState( gl, extensions, capabilities ) {
 
 		activeTexture: activeTexture,
 		bindTexture: bindTexture,
+		bindTextureToSlot: bindTextureToSlot,
 		unbindTexture: unbindTexture,
 		compressedTexImage2D: compressedTexImage2D,
 		texImage2D: texImage2D,
@@ -22831,8 +22863,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		}
 
-		state.activeTexture( 33984 + slot );
-		state.bindTexture( 3553, textureProperties.__webglTexture );
+		state.bindTextureToSlot( 33984 + slot, 3553, textureProperties.__webglTexture );
 
 	}
 
@@ -22847,8 +22878,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		}
 
-		state.activeTexture( 33984 + slot );
-		state.bindTexture( 35866, textureProperties.__webglTexture );
+		state.bindTextureToSlot( 33984 + slot, 35866, textureProperties.__webglTexture );
 
 	}
 
@@ -22863,8 +22893,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		}
 
-		state.activeTexture( 33984 + slot );
-		state.bindTexture( 32879, textureProperties.__webglTexture );
+		state.bindTextureToSlot( 33984 + slot, 32879, textureProperties.__webglTexture );
 
 	}
 
@@ -22879,8 +22908,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 		}
 
-		state.activeTexture( 33984 + slot );
-		state.bindTexture( 34067, textureProperties.__webglTexture );
+		state.bindTextureToSlot( 33984 + slot, 34067, textureProperties.__webglTexture );
 
 	}
 
@@ -23084,8 +23112,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 		const forceUpload = initTexture( textureProperties, texture );
 		const source = texture.source;
 
-		state.activeTexture( 33984 + slot );
-		state.bindTexture( textureType, textureProperties.__webglTexture );
+		state.bindTextureToSlot( 33984 + slot, textureType, textureProperties.__webglTexture );
 
 		if ( source.version !== source.__currentVersion || forceUpload === true ) {
 
@@ -23444,8 +23471,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 		const forceUpload = initTexture( textureProperties, texture );
 		const source = texture.source;
 
-		state.activeTexture( 33984 + slot );
-		state.bindTexture( 34067, textureProperties.__webglTexture );
+		state.bindTextureToSlot( 33984 + slot, 34067, textureProperties.__webglTexture );
 
 		if ( source.version !== source.__currentVersion || forceUpload === true ) {
 
@@ -28266,11 +28292,11 @@ function WebGLRenderer( parameters = {} ) {
 		uniforms.rectAreaLights.needsUpdate = value;
 		uniforms.hemisphereLights.needsUpdate = value;
 
-		uniforms.directionalShadowMap.needsUpdate = value;
+		// uniforms.directionalShadowMap.needsUpdate = value;
 		uniforms.directionalShadowMatrix.needsUpdate = value;
-		uniforms.spotShadowMap.needsUpdate = value;
+		// uniforms.spotShadowMap.needsUpdate = value;
 		uniforms.spotShadowMatrix.needsUpdate = value;
-		uniforms.pointShadowMap.needsUpdate = value;
+		// uniforms.pointShadowMap.needsUpdate = value;
 		uniforms.pointShadowMatrix.needsUpdate = value;
 	}
 

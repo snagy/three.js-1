@@ -1841,11 +1841,11 @@ function WebGLRenderer( parameters = {} ) {
 		uniforms.rectAreaLights.needsUpdate = value;
 		uniforms.hemisphereLights.needsUpdate = value;
 
-		uniforms.directionalShadowMap.needsUpdate = value;
+		// uniforms.directionalShadowMap.needsUpdate = value;
 		uniforms.directionalShadowMatrix.needsUpdate = value;
-		uniforms.spotShadowMap.needsUpdate = value;
+		// uniforms.spotShadowMap.needsUpdate = value;
 		uniforms.spotShadowMatrix.needsUpdate = value;
-		uniforms.pointShadowMap.needsUpdate = value;
+		// uniforms.pointShadowMap.needsUpdate = value;
 		uniforms.pointShadowMatrix.needsUpdate = value;
 	}
 
