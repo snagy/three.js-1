@@ -154,6 +154,7 @@ function WebGLPrograms( renderer, cubemaps, cubeuvmaps, extensions, capabilities
 			iridescenceThicknessMap: useIridescence && !! material.iridescenceThicknessMap,
 
 			displacementMap: !! material.displacementMap,
+			occlusionMetalRoughnessMap: !! material.occlusionMetalRoughnessMap,
 			roughnessMap: !! material.roughnessMap,
 			metalnessMap: !! material.metalnessMap,
 			specularMap: !! material.specularMap,
@@ -446,6 +447,8 @@ function WebGLPrograms( renderer, cubemaps, cubeuvmaps, extensions, capabilities
 			_programLayers.enable( 24 );
 		if ( parameters.numMultiviewViews )
 			_programLayers.enable( 25 );
+		if ( parameters.occlusionMetalRoughnessMap )
+			_programLayers.enable( 26 );
 
 		array.push( _programLayers.mask );
 
