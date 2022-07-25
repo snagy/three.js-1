@@ -149,6 +149,7 @@ function WebGLPrograms( renderer, cubemaps, cubeuvmaps, extensions, capabilities
 			clearcoatNormalMap: useClearcoat && !! material.clearcoatNormalMap,
 
 			displacementMap: !! material.displacementMap,
+			occlusionMetalRoughnessMap: !! material.occlusionMetalRoughnessMap,
 			roughnessMap: !! material.roughnessMap,
 			metalnessMap: !! material.metalnessMap,
 			specularMap: !! material.specularMap,
@@ -431,6 +432,8 @@ function WebGLPrograms( renderer, cubemaps, cubeuvmaps, extensions, capabilities
 			_programLayers.enable( 22 );
 		if ( parameters.opaque )
 			_programLayers.enable( 23 );
+		if ( parameters.occlusionMetalRoughnessMap )
+			_programLayers.enable( 24 );
 
 		array.push( _programLayers.mask );
 

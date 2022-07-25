@@ -3255,6 +3255,9 @@ class GLTFParser {
 				pending.push( parser.assignTexture( materialParams, 'metalnessMap', metallicRoughness.metallicRoughnessTexture ) );
 				pending.push( parser.assignTexture( materialParams, 'roughnessMap', metallicRoughness.metallicRoughnessTexture ) );
 
+				if( materialDef.occlusionTexture === undefined || materialDef.occlusionTexture.index == metallicRoughness.metallicRoughnessTexture.index ) {
+					pending.push( parser.assignTexture( materialParams, 'occlusionMetalRoughnessMap', metallicRoughness.metallicRoughnessTexture ) );
+				}
 			}
 
 			materialType = this._invokeOne( function ( ext ) {
