@@ -9874,7 +9874,7 @@
 
 	var aomap_fragment = "#ifdef USE_AOMAP\n\t#ifdef USE_OMRMAP\n\tfloat ambientOcclusion = ( texture2D( occlusionMetalRoughnessMap, vUv2 ).r - 1.0 ) * aoMapIntensity + 1.0;\n\t#else\n\tfloat ambientOcclusion = ( texture2D( aoMap, vUv2 ).r - 1.0 ) * aoMapIntensity + 1.0;\n\t#endif\n\treflectedLight.indirectDiffuse *= ambientOcclusion;\n\t#if defined( USE_ENVMAP ) && defined( STANDARD )\n\t\tfloat dotNV = saturate( dot( geometry.normal, geometry.viewDir ) );\n\t\treflectedLight.indirectSpecular *= computeSpecularOcclusion( dotNV, ambientOcclusion, material.roughness );\n\t#endif\n#endif";
 
-	var aomap_pars_fragment = "#ifdef USE_AOMAP\n\tuniform sampler2D aoMap;\n\tuniform float aoMapIntensity;\n#endif";
+	var aomap_pars_fragment = "#ifdef USE_AOMAP\n\t#ifndef USE_OMRMAP\n\tuniform sampler2D aoMap;\n\t#endif\n\tuniform float aoMapIntensity;\n#endif";
 
 	var begin_vertex = "vec3 transformed = vec3( position );";
 
@@ -18516,6 +18516,7 @@
 			let glBinding = null;
 			let glProjLayer = null;
 			let glBaseLayer = null;
+			let glSubImage = null;
 			let xrFrame = null;
 			const attributes = gl.getContextAttributes();
 			let initialRenderTarget = null;
@@ -18918,18 +18919,22 @@
 
 			let onAnimationFrameCallback = null;
 
+			this.setRenderTargets = function () {
+				if (glBaseLayer !== null) {
+					renderer.setRenderTargetFramebuffer(newRenderTarget, glBaseLayer.framebuffer);
+					renderer.setRenderTarget(newRenderTarget);
+				} else {
+					renderer.setRenderTargetTextures(newRenderTarget, glSubImage.colorTexture, glProjLayer.ignoreDepthValues ? undefined : glSubImage.depthStencilTexture);
+					renderer.setRenderTarget(newRenderTarget);
+				}
+			};
+
 			function onAnimationFrame(time, frame) {
 				pose = frame.getViewerPose(customReferenceSpace || referenceSpace);
 				xrFrame = frame;
 
 				if (pose !== null) {
 					const views = pose.views;
-
-					if (glBaseLayer !== null) {
-						renderer.setRenderTargetFramebuffer(newRenderTarget, glBaseLayer.framebuffer);
-						renderer.setRenderTarget(newRenderTarget);
-					}
-
 					let cameraVRNeedsUpdate = false; // check if it's necessary to rebuild cameraVR's camera list
 
 					if (views.length !== cameraVR.cameras.length) {
@@ -18944,13 +18949,8 @@
 						if (glBaseLayer !== null) {
 							viewport = glBaseLayer.getViewport(view);
 						} else {
-							const glSubImage = glBinding.getViewSubImage(glProjLayer, view);
-							viewport = glSubImage.viewport; // For side-by-side projection, we only produce a single texture for both eyes.
-
-							if (i === 0) {
-								renderer.setRenderTargetTextures(newRenderTarget, glSubImage.colorTexture, glProjLayer.ignoreDepthValues ? undefined : glSubImage.depthStencilTexture);
-								renderer.setRenderTarget(newRenderTarget);
-							}
+							glSubImage = glBinding.getViewSubImage(glProjLayer, view);
+							viewport = glSubImage.viewport;
 						}
 
 						const camera = cameras[i];
@@ -20088,6 +20088,11 @@
 			if (_clippingEnabled === true) clipping.endShadows(); //
 
 			if (this.info.autoReset === true) this.info.reset(); //
+
+			if (xr.enabled === true && xr.isPresenting === true) {
+				// do this after we render the shadow maps.
+				xr.setRenderTargets();
+			}
 
 			background.render(currentRenderList, scene); // render scene
 
