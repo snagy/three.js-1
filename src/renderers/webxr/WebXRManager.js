@@ -36,6 +36,7 @@ class WebXRManager extends EventDispatcher {
 		let glBinding = null;
 		let glProjLayer = null;
 		let glBaseLayer = null;
+		let glSubImage = null;
 		let xrFrame = null;
 		const attributes = gl.getContextAttributes();
 		let initialRenderTarget = null;
@@ -628,6 +629,28 @@ class WebXRManager extends EventDispatcher {
 
 		let onAnimationFrameCallback = null;
 
+		this.setRenderTargets = function() {
+
+			if ( glBaseLayer !== null ) {
+
+				renderer.setRenderTargetFramebuffer( newRenderTarget, glBaseLayer.framebuffer );
+				renderer.setRenderTarget( newRenderTarget );
+
+			}
+			else {
+
+				renderer.setRenderTargetTextures(
+					newRenderTarget,
+					glSubImage.colorTexture,
+					glProjLayer.ignoreDepthValues ? undefined : glSubImage.depthStencilTexture );
+
+				renderer.setRenderTarget( newRenderTarget );
+
+			}
+
+		};
+
+
 		function onAnimationFrame( time, frame ) {
 
 			pose = frame.getViewerPose( customReferenceSpace || referenceSpace );
@@ -636,13 +659,6 @@ class WebXRManager extends EventDispatcher {
 			if ( pose !== null ) {
 
 				const views = pose.views;
-
-				if ( glBaseLayer !== null ) {
-
-					renderer.setRenderTargetFramebuffer( newRenderTarget, glBaseLayer.framebuffer );
-					renderer.setRenderTarget( newRenderTarget );
-
-				}
 
 				let cameraVRNeedsUpdate = false;
 
@@ -667,19 +683,8 @@ class WebXRManager extends EventDispatcher {
 
 					} else {
 
-						const glSubImage = glBinding.getViewSubImage( glProjLayer, view );
+						glSubImage = glBinding.getViewSubImage( glProjLayer, view );
 						viewport = glSubImage.viewport;
-						// For side-by-side projection, we only produce a single texture for both eyes.
-						if ( i === 0 ) {
-
-							renderer.setRenderTargetTextures(
-								newRenderTarget,
-								glSubImage.colorTexture,
-								glProjLayer.ignoreDepthValues ? undefined : glSubImage.depthStencilTexture );
-
-							renderer.setRenderTarget( newRenderTarget );
-
-						}
 
 					}
 

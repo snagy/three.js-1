@@ -1039,6 +1039,10 @@ function WebGLRenderer( parameters = {} ) {
 		if ( this.info.autoReset === true ) this.info.reset();
 
 		//
+		if ( xr.enabled === true && xr.isPresenting === true ) {
+			// do this after we render the shadow maps.
+			xr.setRenderTargets();
+		}
 
 		background.render( currentRenderList, scene );
 
