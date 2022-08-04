@@ -10,7 +10,7 @@ function painterSortStable( a, b ) {
 
 	} else if ( a.material.id !== b.material.id ) {
 
-		return a.material.id - b.material.id;
+		return a.material.sort_z - b.material.sort_z;
 
 	} else if ( a.z !== b.z ) {
 

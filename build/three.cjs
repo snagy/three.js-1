@@ -14842,7 +14842,7 @@ function painterSortStable(a, b) {
 	} else if (a.renderOrder !== b.renderOrder) {
 		return a.renderOrder - b.renderOrder;
 	} else if (a.material.id !== b.material.id) {
-		return a.material.id - b.material.id;
+		return a.material.sort_z - b.material.sort_z;
 	} else if (a.z !== b.z) {
 		return a.z - b.z;
 	} else {
@@ -19539,6 +19539,10 @@ function WebGLRenderer(parameters = {}) {
 
 	const _projScreenMatrix = new Matrix4();
 
+	const _cameraVector = new Vector3();
+
+	const _cameraPosition = new Vector3();
+
 	const _vector2 = new Vector2();
 
 	const _vector3 = new Vector3();
@@ -20067,6 +20071,8 @@ function WebGLRenderer(parameters = {}) {
 
 		_frustum.setFromProjectionMatrix(_projScreenMatrix);
 
+		camera.getWorldDirection(_cameraVector);
+		camera.getWorldPosition(_cameraPosition);
 		_localClippingEnabled = this.localClippingEnabled;
 		_clippingEnabled = clipping.init(this.clippingPlanes, _localClippingEnabled, camera);
 		currentRenderList = renderLists.get(scene, renderListStack.length);
@@ -20161,15 +20167,17 @@ function WebGLRenderer(parameters = {}) {
 				}
 			} else if (object.isSprite) {
 				if (!object.frustumCulled || _frustum.intersectsSprite(object)) {
+					let sortDepth = 0.0;
+
 					if (sortObjects) {
-						_vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(_projScreenMatrix);
+						sortDepth = _vector3.setFromMatrixPosition(object.matrixWorld).sub(_cameraPosition).dot(_cameraVector);
 					}
 
 					const geometry = objects.update(object);
 					const material = object.material;
 
 					if (material.visible) {
-						currentRenderList.push(object, geometry, material, groupOrder, _vector3.z, null);
+						currentRenderList.push(object, geometry, material, groupOrder, sortDepth, null);
 					}
 				}
 			} else if (object.isMesh || object.isLine || object.isPoints) {
@@ -20182,8 +20190,10 @@ function WebGLRenderer(parameters = {}) {
 				}
 
 				if (!object.frustumCulled || _frustum.intersectsObject(object)) {
+					let sortDepth = 0.0;
+
 					if (sortObjects) {
-						_vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(_projScreenMatrix);
+						sortDepth = _vector3.setFromMatrixPosition(object.matrixWorld).sub(_cameraPosition).dot(_cameraVector);
 					}
 
 					const geometry = objects.update(object);
@@ -20197,11 +20207,15 @@ function WebGLRenderer(parameters = {}) {
 							const groupMaterial = material[group.materialIndex];
 
 							if (groupMaterial && groupMaterial.visible) {
-								currentRenderList.push(object, geometry, groupMaterial, groupOrder, _vector3.z, group);
+								groupMaterial.sort_z = sortDepth;
+								currentRenderList.push(object, geometry, groupMaterial, groupOrder, sortDepth, group);
 							}
 						}
 					} else if (material.visible) {
-						currentRenderList.push(object, geometry, material, groupOrder, _vector3.z, null);
+						// is this ideal?	no....but right now materials with separate ids are just sorted
+						// by the material id.	at least this will attempt to sort between materials properly.
+						material.sort_z = sortDepth;
+						currentRenderList.push(object, geometry, material, groupOrder, sortDepth, null);
 					}
 				}
 			}
