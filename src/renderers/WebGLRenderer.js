@@ -214,6 +214,8 @@ function WebGLRenderer( parameters = {} ) {
 
 	const _emptyScene = { background: null, fog: null, environment: null, overrideMaterial: null, isScene: true };
 
+	const boneTexturesToUpload = [];
+
 	function getTargetPixelRatio() {
 
 		return _currentRenderTarget === null ? _pixelRatio : 1;
@@ -1028,6 +1030,14 @@ function WebGLRenderer( parameters = {} ) {
 
 		}
 
+		// upload bone textures recorded from last frame, after they are recalculated and updated
+		boneTexturesToUpload.forEach( boneTexture => {
+
+			const unit = textures.allocateTextureUnit();
+			textures.setTexture2D( boneTexture, unit, { noDefer: true } );
+
+		} );
+
 		//
 
 		if ( _clippingEnabled === true ) clipping.beginShadows();
@@ -1044,8 +1054,10 @@ function WebGLRenderer( parameters = {} ) {
 
 		//
 		if ( xr.enabled === true && xr.isPresenting === true ) {
+
 			// do this after we render the shadow maps.
 			xr.setRenderTargets();
+
 		}
 
 		background.render( currentRenderList, scene );
@@ -1057,9 +1069,10 @@ function WebGLRenderer( parameters = {} ) {
 		if ( camera.isArrayCamera ) {
 
 
-			if ( xr.enabled && xr.isMultiview ) {
+			textures.deferTextureUploads = true;
 
-				textures.deferTextureUploads = true;
+
+			if ( xr.enabled && xr.isMultiview ) {
 
 				renderScene( currentRenderList, scene, camera, camera.cameras[ 0 ].viewport );
 
@@ -1261,6 +1274,8 @@ function WebGLRenderer( parameters = {} ) {
 		const opaqueObjects = currentRenderList.opaque;
 		const transmissiveObjects = currentRenderList.transmissive;
 		const transparentObjects = currentRenderList.transparent;
+
+		boneTexturesToUpload.length = 0;
 
 		currentRenderState.setupLightsView( camera );
 
@@ -1783,7 +1798,27 @@ function WebGLRenderer( parameters = {} ) {
 
 					if ( skeleton.boneTexture === null ) skeleton.computeBoneTexture();
 
-					p_uniforms.setValue( _gl, 'boneTexture', skeleton.boneTexture, textures );
+
+					const u = p_uniforms.map[ 'boneTexture' ];
+					if ( u !== undefined ) {
+
+						const cache = u.cache;
+						const unit = textures.allocateTextureUnit();
+
+						if ( cache[ 0 ] !== unit ) {
+
+							_gl.uniform1i( u.addr, unit );
+							cache[ 0 ] = unit;
+
+						}
+
+						textures.setTexture2D( skeleton.boneTexture, unit, { noUpload: true } );
+
+					}
+
+					// record the skeletons for bone texture uploads on the next frame before render
+					boneTexturesToUpload.push( skeleton.boneTexture );
+
 					p_uniforms.setValue( _gl, 'boneTextureSize', skeleton.boneTextureSize );
 
 				} else {

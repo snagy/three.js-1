@@ -436,7 +436,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 	//
 
-	function setTexture2D( texture, slot ) {
+	function setTexture2D( texture, slot, options = { noDefer: false, noUpload: false } ) {
 
 		const textureProperties = properties.get( texture );
 
@@ -456,7 +456,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 			} else {
 
-				if ( this.uploadTexture( textureProperties, texture, slot ) ) {
+				if ( ! options.noUpload && this.uploadTexture( textureProperties, texture, slot, options.noDefer ) ) {
 
 					return;
 
@@ -691,9 +691,9 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 	}
 
-	function uploadTexture( textureProperties, texture, slot ) {
+	function uploadTexture( textureProperties, texture, slot, noDefer = false ) {
 
-		if ( this.deferTextureUploads ) {
+		if ( this.deferTextureUploads && ! noDefer ) {
 
 			if ( ! texture.isPendingDeferredUpload ) {
 
@@ -720,6 +720,8 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 		const sourceProperties = properties.get( source );
 
 		if ( source.version !== sourceProperties.__version || forceUpload === true ) {
+
+			state.activeTexture( _gl.TEXTURE0 + slot );
 
 			state.activeTexture( _gl.TEXTURE0 + slot );
 
@@ -1083,6 +1085,8 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 		const sourceProperties = properties.get( source );
 
 		if ( source.version !== sourceProperties.__version || forceUpload === true ) {
+
+			state.activeTexture( _gl.TEXTURE0 + slot );
 
 			state.activeTexture( _gl.TEXTURE0 + slot );
 
