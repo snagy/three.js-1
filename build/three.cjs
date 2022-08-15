@@ -17123,6 +17123,8 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
 		state.bindTextureToSlot(_gl.TEXTURE0 + slot, textureType, textureProperties.__webglTexture);
 
 		if (source.version !== source.__currentVersion || forceUpload === true) {
+			state.activeTexture(_gl.TEXTURE0 + slot);
+
 			_gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
 
 			_gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
@@ -17344,6 +17346,8 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
 		state.bindTextureToSlot(_gl.TEXTURE0 + slot, _gl.TEXTURE_CUBE_MAP, textureProperties.__webglTexture);
 
 		if (source.version !== source.__currentVersion || forceUpload === true) {
+			state.activeTexture(_gl.TEXTURE0 + slot);
+
 			_gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
 
 			_gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
@@ -19554,6 +19558,7 @@ function WebGLRenderer(parameters = {}) {
 		overrideMaterial: null,
 		isScene: true
 	};
+	const boneTexturesToUpload = [];
 
 	function getTargetPixelRatio() {
 		return _currentRenderTarget === null ? _pixelRatio : 1;
@@ -20083,8 +20088,17 @@ function WebGLRenderer(parameters = {}) {
 
 		if (_this.sortObjects === true) {
 			currentRenderList.sort(_opaqueSort, _transparentSort);
-		} //
+		} // upload bone textures recorded from last frame, after they are recalculated and updated
 
+
+		const previousDeferSetting = textures.deferTextureUploads;
+		textures.deferTextureUploads = false;
+		boneTexturesToUpload.forEach(boneTexture => {
+			const unit = textures.allocateTextureUnit();
+			const textureProperties = properties.get(boneTexture);
+			textures.uploadTexture(textureProperties, boneTexture, unit);
+		});
+		textures.deferTextureUploads = previousDeferSetting; //
 
 		if (_clippingEnabled === true) clipping.beginShadows();
 		const shadowsArray = currentRenderState.state.shadowsArray;
@@ -20232,6 +20246,7 @@ function WebGLRenderer(parameters = {}) {
 		const opaqueObjects = currentRenderList.opaque;
 		const transmissiveObjects = currentRenderList.transmissive;
 		const transparentObjects = currentRenderList.transparent;
+		boneTexturesToUpload.length = 0;
 		currentRenderState.setupLightsView(camera);
 		if (transmissiveObjects.length > 0) renderTransmissionPass(opaqueObjects, scene, camera);
 		if (viewport) state.viewport(_currentViewport.copy(viewport));
@@ -20574,7 +20589,24 @@ function WebGLRenderer(parameters = {}) {
 			if (skeleton) {
 				if (capabilities.floatVertexTextures) {
 					if (skeleton.boneTexture === null) skeleton.computeBoneTexture();
-					p_uniforms.setValue(_gl, 'boneTexture', skeleton.boneTexture, textures);
+					const u = p_uniforms.map['boneTexture'];
+
+					if (u !== undefined) {
+						const cache = u.cache;
+						const unit = textures.allocateTextureUnit();
+
+						if (cache[0] !== unit) {
+							_gl.uniform1i(u.addr, unit);
+
+							cache[0] = unit;
+						}
+
+						const textureProperties = properties.get(skeleton.boneTexture);
+						state.bindTextureToSlot(_gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture);
+					} // record the skeletons for bone texture uploads on the next frame before render
+
+
+					boneTexturesToUpload.push(skeleton.boneTexture);
 					p_uniforms.setValue(_gl, 'boneTextureSize', skeleton.boneTextureSize);
 				} else {
 					console.warn('THREE.WebGLRenderer: SkinnedMesh can only be used with WebGL 2. With WebGL 1 OES_texture_float and vertex textures support is required.');
