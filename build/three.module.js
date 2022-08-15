@@ -22845,7 +22845,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 	//
 
-	function setTexture2D( texture, slot, options = { noDefer: false, noUpload: false } ) {
+	function setTexture2D( texture, slot ) {
 
 		const textureProperties = properties.get( texture );
 
@@ -22865,7 +22865,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 			} else {
 
-				if ( ! options.noUpload && this.uploadTexture( textureProperties, texture, slot, options.noDefer ) ) {
+				if ( this.uploadTexture( textureProperties, texture, slot ) ) {
 
 					return;
 
@@ -23100,9 +23100,9 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 	}
 
-	function uploadTexture( textureProperties, texture, slot, noDefer = false ) {
+	function uploadTexture( textureProperties, texture, slot ) {
 
-		if ( this.deferTextureUploads && ! noDefer ) {
+		if ( this.deferTextureUploads ) {
 
 			if ( ! texture.isPendingDeferredUpload ) {
 
@@ -27474,12 +27474,18 @@ function WebGLRenderer( parameters = {} ) {
 		}
 
 		// upload bone textures recorded from last frame, after they are recalculated and updated
+		const previousDeferSetting = textures.deferTextureUploads;
+		textures.deferTextureUploads = false;
+
 		boneTexturesToUpload.forEach( boneTexture => {
 
 			const unit = textures.allocateTextureUnit();
-			textures.setTexture2D( boneTexture, unit, { noDefer: true } );
+			const textureProperties = properties.get( boneTexture );
+			textures.uploadTexture( textureProperties, boneTexture, unit );
 
 		} );
+
+		textures.deferTextureUploads = previousDeferSetting;
 
 		//
 
@@ -28252,7 +28258,8 @@ function WebGLRenderer( parameters = {} ) {
 
 						}
 
-						textures.setTexture2D( skeleton.boneTexture, unit, { noUpload: true } );
+						const textureProperties = properties.get( skeleton.boneTexture );
+						state.bindTextureToSlot( 33984 + unit, 3553, textureProperties.__webglTexture );
 
 					}
 

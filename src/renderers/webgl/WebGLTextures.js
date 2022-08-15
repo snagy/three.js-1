@@ -426,7 +426,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 	//
 
-	function setTexture2D( texture, slot, options = { noDefer: false, noUpload: false } ) {
+	function setTexture2D( texture, slot ) {
 
 		const textureProperties = properties.get( texture );
 
@@ -446,7 +446,7 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 			} else {
 
-				if ( ! options.noUpload && this.uploadTexture( textureProperties, texture, slot, options.noDefer ) ) {
+				if ( this.uploadTexture( textureProperties, texture, slot ) ) {
 
 					return;
 
@@ -681,9 +681,9 @@ function WebGLTextures( _gl, extensions, state, properties, capabilities, utils,
 
 	}
 
-	function uploadTexture( textureProperties, texture, slot, noDefer = false ) {
+	function uploadTexture( textureProperties, texture, slot ) {
 
-		if ( this.deferTextureUploads && ! noDefer ) {
+		if ( this.deferTextureUploads ) {
 
 			if ( ! texture.isPendingDeferredUpload ) {
 
