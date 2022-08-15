@@ -20393,9 +20393,8 @@ function WebGLRenderer(parameters = {}) {
 		currentRenderState.setupLights(_this.physicallyCorrectLights);
 
 		if (camera.isArrayCamera) {
-			textures.deferTextureUploads = true;
-
 			if (xr.enabled && xr.isMultiview) {
+				textures.deferTextureUploads = true;
 				renderScene(currentRenderList, scene, camera, camera.cameras[0].viewport);
 			} else {
 				const cameras = camera.cameras;
