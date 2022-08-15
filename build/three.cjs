@@ -16830,10 +16830,7 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
 	} //
 
 
-	function setTexture2D(texture, slot, options = {
-		noDefer: false,
-		noUpload: false
-	}) {
+	function setTexture2D(texture, slot) {
 		const textureProperties = properties.get(texture);
 		if (texture.isVideoTexture) updateVideoTexture(texture);
 
@@ -16845,7 +16842,7 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
 			} else if (image.complete === false) {
 				console.warn('THREE.WebGLRenderer: Texture marked for update but image is incomplete');
 			} else {
-				if (!options.noUpload && this.uploadTexture(textureProperties, texture, slot, options.noDefer)) {
+				if (this.uploadTexture(textureProperties, texture, slot)) {
 					return;
 				}
 			}
@@ -17020,8 +17017,8 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
 		this.deferTextureUploads = previousDeferSetting;
 	}
 
-	function uploadTexture(textureProperties, texture, slot, noDefer = false) {
-		if (this.deferTextureUploads && !noDefer) {
+	function uploadTexture(textureProperties, texture, slot) {
+		if (this.deferTextureUploads) {
 			if (!texture.isPendingDeferredUpload) {
 				texture.isPendingDeferredUpload = true;
 
@@ -20369,12 +20366,14 @@ function WebGLRenderer(parameters = {}) {
 		} // upload bone textures recorded from last frame, after they are recalculated and updated
 
 
+		const previousDeferSetting = textures.deferTextureUploads;
+		textures.deferTextureUploads = false;
 		boneTexturesToUpload.forEach(boneTexture => {
 			const unit = textures.allocateTextureUnit();
-			textures.setTexture2D(boneTexture, unit, {
-				noDefer: true
-			});
-		}); //
+			const textureProperties = properties.get(boneTexture);
+			textures.uploadTexture(textureProperties, boneTexture, unit);
+		});
+		textures.deferTextureUploads = previousDeferSetting; //
 
 		if (_clippingEnabled === true) clipping.beginShadows();
 		const shadowsArray = currentRenderState.state.shadowsArray;
@@ -20878,9 +20877,8 @@ function WebGLRenderer(parameters = {}) {
 							cache[0] = unit;
 						}
 
-						textures.setTexture2D(skeleton.boneTexture, unit, {
-							noUpload: true
-						});
+						const textureProperties = properties.get(skeleton.boneTexture);
+						state.bindTextureToSlot(_gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture);
 					} // record the skeletons for bone texture uploads on the next frame before render
 
 

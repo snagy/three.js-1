@@ -1031,12 +1031,18 @@ function WebGLRenderer( parameters = {} ) {
 		}
 
 		// upload bone textures recorded from last frame, after they are recalculated and updated
+		const previousDeferSetting = textures.deferTextureUploads;
+		textures.deferTextureUploads = false;
+
 		boneTexturesToUpload.forEach( boneTexture => {
 
 			const unit = textures.allocateTextureUnit();
-			textures.setTexture2D( boneTexture, unit, { noDefer: true } );
+			const textureProperties = properties.get( boneTexture );
+			textures.uploadTexture( textureProperties, boneTexture, unit );
 
 		} );
+
+		textures.deferTextureUploads = previousDeferSetting;
 
 		//
 
@@ -1810,7 +1816,8 @@ function WebGLRenderer( parameters = {} ) {
 
 						}
 
-						textures.setTexture2D( skeleton.boneTexture, unit, { noUpload: true } );
+						const textureProperties = properties.get( skeleton.boneTexture );
+						state.bindTextureToSlot( _gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture );
 
 					}
 
