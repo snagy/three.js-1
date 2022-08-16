@@ -708,6 +708,12 @@ function WebGLRenderer( parameters = {} ) {
 
 		if ( scene === null ) scene = _emptyScene; // renderBufferDirect second parameter used to be fog (could be null)
 
+		if ( object.isInstancedMesh && object.count < 1 ) {
+
+			return;
+
+		}
+
 		const frontFaceCW = ( object.isMesh && object.matrixWorld.determinant() < 0 );
 
 		const program = setProgram( camera, scene, geometry, material, object );
