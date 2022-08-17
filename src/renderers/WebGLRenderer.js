@@ -1221,7 +1221,22 @@ function WebGLRenderer( parameters = {} ) {
 
 				}
 
-				if ( ! object.frustumCulled || _frustum.intersectsObject( object ) ) {
+				const material = object.material;
+				let shouldDraw = Array.isArray( material ) || material.visible;
+
+				if( shouldDraw ) {
+					if (object.isManagedInstancedMesh) {
+						object._cull(_frustum);
+
+						if(object.count < 1) {
+							shouldDraw = false;
+						}
+					} else {
+						shouldDraw = ! object.frustumCulled || _frustum.intersectsObject( object );
+					}
+				}
+
+				if ( shouldDraw ) {
 
 					let sortDepth = 0.0;
 
@@ -1232,7 +1247,6 @@ function WebGLRenderer( parameters = {} ) {
 					}
 
 					const geometry = objects.update( object );
-					const material = object.material;
 
 					if ( Array.isArray( material ) ) {
 
@@ -1253,7 +1267,7 @@ function WebGLRenderer( parameters = {} ) {
 
 						}
 
-					} else if ( material.visible ) {
+					} else {
 
 						// is this ideal?  no....but right now materials with separate ids are just sorted
 						// by the material id.  at least this will attempt to sort between materials properly.
