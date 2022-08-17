@@ -13639,9 +13639,14 @@ function setValueV4uiArray(gl, v) {
 
 
 function setValueT1Array(gl, v, textures) {
+	const cache = this.cache;
 	const n = v.length;
 	const units = allocTexUnits(textures, n);
-	gl.uniform1iv(this.addr, units);
+
+	if (!arraysEqual(cache, units)) {
+		gl.uniform1iv(this.addr, units);
+		copyArray(cache, units);
+	}
 
 	for (let i = 0; i !== n; ++i) {
 		textures.setTexture2D(v[i] || emptyTexture, units[i]);
@@ -13649,9 +13654,14 @@ function setValueT1Array(gl, v, textures) {
 }
 
 function setValueT3DArray(gl, v, textures) {
+	const cache = this.cache;
 	const n = v.length;
 	const units = allocTexUnits(textures, n);
-	gl.uniform1iv(this.addr, units);
+
+	if (!arraysEqual(cache, units)) {
+		gl.uniform1iv(this.addr, units);
+		copyArray(cache, units);
+	}
 
 	for (let i = 0; i !== n; ++i) {
 		textures.setTexture3D(v[i] || empty3dTexture, units[i]);
@@ -13659,9 +13669,14 @@ function setValueT3DArray(gl, v, textures) {
 }
 
 function setValueT6Array(gl, v, textures) {
+	const cache = this.cache;
 	const n = v.length;
 	const units = allocTexUnits(textures, n);
-	gl.uniform1iv(this.addr, units);
+
+	if (!arraysEqual(cache, units)) {
+		gl.uniform1iv(this.addr, units);
+		copyArray(cache, units);
+	}
 
 	for (let i = 0; i !== n; ++i) {
 		textures.setTextureCube(v[i] || emptyCubeTexture, units[i]);
@@ -13669,9 +13684,14 @@ function setValueT6Array(gl, v, textures) {
 }
 
 function setValueT2DArrayArray(gl, v, textures) {
+	const cache = this.cache;
 	const n = v.length;
 	const units = allocTexUnits(textures, n);
-	gl.uniform1iv(this.addr, units);
+
+	if (!arraysEqual(cache, units)) {
+		gl.uniform1iv(this.addr, units);
+		copyArray(cache, units);
+	}
 
 	for (let i = 0; i !== n; ++i) {
 		textures.setTexture2DArray(v[i] || emptyArrayTexture, units[i]);
@@ -20207,7 +20227,22 @@ function WebGLRenderer(parameters = {}) {
 					}
 				}
 
-				if (!object.frustumCulled || _frustum.intersectsObject(object)) {
+				const material = object.material;
+				let shouldDraw = Array.isArray(material) || material.visible;
+
+				if (shouldDraw) {
+					if (object.isManagedInstancedMesh) {
+						object._cull(_frustum);
+
+						if (object.count < 1) {
+							shouldDraw = false;
+						}
+					} else {
+						shouldDraw = !object.frustumCulled || _frustum.intersectsObject(object);
+					}
+				}
+
+				if (shouldDraw) {
 					let sortDepth = 0.0;
 
 					if (sortObjects) {
@@ -20215,7 +20250,6 @@ function WebGLRenderer(parameters = {}) {
 					}
 
 					const geometry = objects.update(object);
-					const material = object.material;
 
 					if (Array.isArray(material)) {
 						const groups = geometry.groups;
@@ -20229,7 +20263,7 @@ function WebGLRenderer(parameters = {}) {
 								currentRenderList.push(object, geometry, groupMaterial, groupOrder, sortDepth, group);
 							}
 						}
-					} else if (material.visible) {
+					} else {
 						// is this ideal?	no....but right now materials with separate ids are just sorted
 						// by the material id.	at least this will attempt to sort between materials properly.
 						material.sort_z = sortDepth;
