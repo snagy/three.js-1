@@ -1,5 +1,6 @@
 import { Vector3 } from '../math/Vector3.js';
 import { Vector2 } from '../math/Vector2.js';
+import { Color } from '../math/Color.js';
 import { denormalize, normalize } from '../math/MathUtils.js';
 import { StaticDrawUsage } from '../constants.js';
 
@@ -85,6 +86,150 @@ class BufferAttribute {
 
 	}
 
+	copyColorsArray( colors ) {
+
+		const array = this.array;
+		let offset = 0;
+
+		for ( let i = 0, l = colors.length; i < l; i ++ ) {
+
+			let color = colors[ i ];
+
+			if ( color === undefined ) {
+
+				console.warn( 'THREE.BufferAttribute.copyColorsArray(): color is undefined', i );
+				color = new Color();
+
+			}
+
+			if ( this.normalized ) {
+
+				array[ offset ++ ] = normalize( color.r, array );
+				array[ offset ++ ] = normalize( color.g, array );
+				array[ offset ++ ] = normalize( color.b, array );
+
+			} else {
+
+				array[ offset ++ ] = color.r;
+				array[ offset ++ ] = color.g;
+				array[ offset ++ ] = color.b;
+
+			}
+
+		}
+
+		return this;
+
+	}
+
+	copyVector2sArray( vectors ) {
+
+		const array = this.array;
+		let offset = 0;
+
+		for ( let i = 0, l = vectors.length; i < l; i ++ ) {
+
+			let vector = vectors[ i ];
+
+			if ( vector === undefined ) {
+
+				console.warn( 'THREE.BufferAttribute.copyVector2sArray(): vector is undefined', i );
+				vector = new Vector2();
+
+			}
+
+			if ( this.normalized ) {
+
+				array[ offset ++ ] = normalize( vector.x, array );
+				array[ offset ++ ] = normalize( vector.y, array );
+
+			} else {
+
+				array[ offset ++ ] = vector.x;
+				array[ offset ++ ] = vector.y;
+
+			}
+
+		}
+
+		return this;
+
+	}
+
+	copyVector3sArray( vectors ) {
+
+		const array = this.array;
+		let offset = 0;
+
+		for ( let i = 0, l = vectors.length; i < l; i ++ ) {
+
+			let vector = vectors[ i ];
+
+			if ( vector === undefined ) {
+
+				console.warn( 'THREE.BufferAttribute.copyVector3sArray(): vector is undefined', i );
+				vector = new Vector3();
+
+			}
+
+			if ( this.normalized ) {
+
+				array[ offset ++ ] = normalize( vector.x, array );
+				array[ offset ++ ] = normalize( vector.y, array );
+				array[ offset ++ ] = normalize( vector.z, array );
+
+			} else {
+
+				array[ offset ++ ] = vector.x;
+				array[ offset ++ ] = vector.y;
+				array[ offset ++ ] = vector.z;
+
+			}
+
+		}
+
+		return this;
+
+	}
+
+	copyVector4sArray( vectors ) {
+
+		const array = this.array;
+		let offset = 0;
+
+		for ( let i = 0, l = vectors.length; i < l; i ++ ) {
+
+			let vector = vectors[ i ];
+
+			if ( vector === undefined ) {
+
+				console.warn( 'THREE.BufferAttribute.copyVector4sArray(): vector is undefined', i );
+				vector = new Vector4();
+
+			}
+
+			if ( this.normalized ) {
+
+				array[ offset ++ ] = normalize( vector.x, array );
+				array[ offset ++ ] = normalize( vector.y, array );
+				array[ offset ++ ] = normalize( vector.z, array );
+				array[ offset ++ ] = normalize( vector.w, array );
+
+			} else {
+
+				array[ offset ++ ] = vector.x;
+				array[ offset ++ ] = vector.y;
+				array[ offset ++ ] = vector.z;
+				array[ offset ++ ] = vector.w;
+
+			}
+
+		}
+
+		return this;
+
+	}
+
 	applyMatrix3( m ) {
 
 		if ( this.itemSize === 2 ) {
@@ -165,7 +310,8 @@ class BufferAttribute {
 
 	set( value, offset = 0 ) {
 
-		// Matching BufferAttribute constructor, do not normalize the array.
+		if ( this.normalized ) value = normalize( value, this.array );
+
 		this.array.set( value, offset );
 
 		return this;
