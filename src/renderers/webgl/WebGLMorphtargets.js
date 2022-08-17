@@ -112,8 +112,6 @@ function WebGLMorphtargets( gl, capabilities, textures ) {
 
 							morph.fromBufferAttribute( morphTarget, j );
 
-							if ( morphTarget.normalized === true ) denormalize( morph, morphTarget );
-
 							buffer[ offset + stride + 0 ] = morph.x;
 							buffer[ offset + stride + 1 ] = morph.y;
 							buffer[ offset + stride + 2 ] = morph.z;
@@ -125,8 +123,6 @@ function WebGLMorphtargets( gl, capabilities, textures ) {
 
 							morph.fromBufferAttribute( morphNormal, j );
 
-							if ( morphNormal.normalized === true ) denormalize( morph, morphNormal );
-
 							buffer[ offset + stride + 4 ] = morph.x;
 							buffer[ offset + stride + 5 ] = morph.y;
 							buffer[ offset + stride + 6 ] = morph.z;
@@ -137,8 +133,6 @@ function WebGLMorphtargets( gl, capabilities, textures ) {
 						if ( hasMorphColors === true ) {
 
 							morph.fromBufferAttribute( morphColor, j );
-
-							if ( morphColor.normalized === true ) denormalize( morph, morphColor );
 
 							buffer[ offset + stride + 8 ] = morph.x;
 							buffer[ offset + stride + 9 ] = morph.y;
