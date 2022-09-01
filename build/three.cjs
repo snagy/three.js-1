@@ -12806,7 +12806,7 @@ function WebGLMorphtargets(gl, capabilities, textures) {
 			program.getUniforms().setValue(gl, 'morphTargetBaseInfluence', morphBaseInfluence);
 			program.getUniforms().setValue(gl, 'morphTargetInfluences', objectInfluences);
 			program.getUniforms().setValue(gl, 'morphTargetsTexture', entry.texture, textures);
-			program.getUniforms().setValue(gl, 'morphTargetsTextureSize', entry.size);
+			program.getUniforms().setValue(gl, 'morphTargetsTextureSize', [entry.size.x, entry.size.y]);
 		} else {
 			// When object doesn't have morph target influences defined, we treat it as a 0-length array
 			// This is important to make sure we set up morphTargetBaseInfluence / morphTargetInfluences
