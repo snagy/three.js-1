@@ -419,7 +419,7 @@
 		}
 	}
 
-	function denormalize$1(value, array) {
+	function denormalize(value, array) {
 		switch (array.constructor) {
 			case Float32Array:
 				return value;
@@ -488,7 +488,7 @@
 		floorPowerOfTwo: floorPowerOfTwo,
 		setQuaternionFromProperEuler: setQuaternionFromProperEuler,
 		normalize: normalize,
-		denormalize: denormalize$1
+		denormalize: denormalize
 	});
 
 	class Vector2 {
@@ -1733,14 +1733,6 @@
 			this.r = attribute.getX(index);
 			this.g = attribute.getY(index);
 			this.b = attribute.getZ(index);
-
-			if (attribute.normalized === true) {
-				// assuming Uint8Array
-				this.r /= 255;
-				this.g /= 255;
-				this.b /= 255;
-			}
-
 			return this;
 		}
 
@@ -7255,9 +7247,15 @@
 					color = new Color();
 				}
 
-				array[offset++] = color.r;
-				array[offset++] = color.g;
-				array[offset++] = color.b;
+				if (this.normalized) {
+					array[offset++] = normalize(color.r, array);
+					array[offset++] = normalize(color.g, array);
+					array[offset++] = normalize(color.b, array);
+				} else {
+					array[offset++] = color.r;
+					array[offset++] = color.g;
+					array[offset++] = color.b;
+				}
 			}
 
 			return this;
@@ -7275,8 +7273,13 @@
 					vector = new Vector2();
 				}
 
-				array[offset++] = vector.x;
-				array[offset++] = vector.y;
+				if (this.normalized) {
+					array[offset++] = normalize(vector.x, array);
+					array[offset++] = normalize(vector.y, array);
+				} else {
+					array[offset++] = vector.x;
+					array[offset++] = vector.y;
+				}
 			}
 
 			return this;
@@ -7294,9 +7297,15 @@
 					vector = new Vector3();
 				}
 
-				array[offset++] = vector.x;
-				array[offset++] = vector.y;
-				array[offset++] = vector.z;
+				if (this.normalized) {
+					array[offset++] = normalize(vector.x, array);
+					array[offset++] = normalize(vector.y, array);
+					array[offset++] = normalize(vector.z, array);
+				} else {
+					array[offset++] = vector.x;
+					array[offset++] = vector.y;
+					array[offset++] = vector.z;
+				}
 			}
 
 			return this;
@@ -7314,10 +7323,17 @@
 					vector = new Vector4();
 				}
 
-				array[offset++] = vector.x;
-				array[offset++] = vector.y;
-				array[offset++] = vector.z;
-				array[offset++] = vector.w;
+				if (this.normalized) {
+					array[offset++] = normalize(vector.x, array);
+					array[offset++] = normalize(vector.y, array);
+					array[offset++] = normalize(vector.z, array);
+					array[offset++] = normalize(vector.w, array);
+				} else {
+					array[offset++] = vector.x;
+					array[offset++] = vector.y;
+					array[offset++] = vector.z;
+					array[offset++] = vector.w;
+				}
 			}
 
 			return this;
@@ -7382,48 +7398,67 @@
 		}
 
 		set(value, offset = 0) {
+			// Matching BufferAttribute constructor, do not normalize the array.
 			this.array.set(value, offset);
 			return this;
 		}
 
 		getX(index) {
-			return this.array[index * this.itemSize];
+			let x = this.array[index * this.itemSize];
+			if (this.normalized) x = denormalize(x, this.array);
+			return x;
 		}
 
 		setX(index, x) {
+			if (this.normalized) x = normalize(x, this.array);
 			this.array[index * this.itemSize] = x;
 			return this;
 		}
 
 		getY(index) {
-			return this.array[index * this.itemSize + 1];
+			let y = this.array[index * this.itemSize + 1];
+			if (this.normalized) y = denormalize(y, this.array);
+			return y;
 		}
 
 		setY(index, y) {
+			if (this.normalized) y = normalize(y, this.array);
 			this.array[index * this.itemSize + 1] = y;
 			return this;
 		}
 
 		getZ(index) {
-			return this.array[index * this.itemSize + 2];
+			let z = this.array[index * this.itemSize + 2];
+			if (this.normalized) z = denormalize(z, this.array);
+			return z;
 		}
 
 		setZ(index, z) {
+			if (this.normalized) z = normalize(z, this.array);
 			this.array[index * this.itemSize + 2] = z;
 			return this;
 		}
 
 		getW(index) {
-			return this.array[index * this.itemSize + 3];
+			let w = this.array[index * this.itemSize + 3];
+			if (this.normalized) w = denormalize(w, this.array);
+			return w;
 		}
 
 		setW(index, w) {
+			if (this.normalized) w = normalize(w, this.array);
 			this.array[index * this.itemSize + 3] = w;
 			return this;
 		}
 
 		setXY(index, x, y) {
 			index *= this.itemSize;
+
+			if (this.normalized) {
+				x = normalize(x, this.array);
+				y = normalize(y, this.array);
+			}
+
 			this.array[index + 0] = x;
 			this.array[index + 1] = y;
 			return this;
@@ -7431,6 +7466,13 @@
 
 		setXYZ(index, x, y, z) {
 			index *= this.itemSize;
+
+			if (this.normalized) {
+				x = normalize(x, this.array);
+				y = normalize(y, this.array);
+				z = normalize(z, this.array);
+			}
+
 			this.array[index + 0] = x;
 			this.array[index + 1] = y;
 			this.array[index + 2] = z;
@@ -7439,6 +7481,14 @@
 
 		setXYZW(index, x, y, z, w) {
 			index *= this.itemSize;
+
+			if (this.normalized) {
+				x = normalize(x, this.array);
+				y = normalize(y, this.array);
+				z = normalize(z, this.array);
+				w = normalize(w, this.array);
+			}
+
 			this.array[index + 0] = x;
 			this.array[index + 1] = y;
 			this.array[index + 2] = z;
@@ -12867,13 +12917,6 @@
 		return Math.abs(b[1]) - Math.abs(a[1]);
 	}
 
-	function denormalize(morph, attribute) {
-		let denominator = 1;
-		const array = attribute.isInterleavedBufferAttribute ? attribute.data.array : attribute.array;
-		if (array instanceof Int8Array) denominator = 127;else if (array instanceof Int16Array) denominator = 32767;else if (array instanceof Int32Array) denominator = 2147483647;else console.error('THREE.WebGLMorphtargets: Unsupported morph attribute data type: ', array);
-		morph.divideScalar(denominator);
-	}
-
 	function WebGLMorphtargets(gl, capabilities, textures) {
 		const influencesList = {};
 		const morphInfluences = new Float32Array(8);
@@ -12933,7 +12976,6 @@
 
 							if (hasMorphPosition === true) {
 								morph.fromBufferAttribute(morphTarget, j);
-								if (morphTarget.normalized === true) denormalize(morph, morphTarget);
 								buffer[offset + stride + 0] = morph.x;
 								buffer[offset + stride + 1] = morph.y;
 								buffer[offset + stride + 2] = morph.z;
@@ -12942,7 +12984,6 @@
 
 							if (hasMorphNormals === true) {
 								morph.fromBufferAttribute(morphNormal, j);
-								if (morphNormal.normalized === true) denormalize(morph, morphNormal);
 								buffer[offset + stride + 4] = morph.x;
 								buffer[offset + stride + 5] = morph.y;
 								buffer[offset + stride + 6] = morph.z;
@@ -12951,7 +12992,6 @@
 
 							if (hasMorphColors === true) {
 								morph.fromBufferAttribute(morphColor, j);
-								if (morphColor.normalized === true) denormalize(morph, morphColor);
 								buffer[offset + stride + 8] = morph.x;
 								buffer[offset + stride + 9] = morph.y;
 								buffer[offset + stride + 10] = morph.z;
@@ -21285,43 +21325,61 @@
 		}
 
 		setX(index, x) {
+			if (this.normalized) x = normalize(x, this.array);
 			this.data.array[index * this.data.stride + this.offset] = x;
 			return this;
 		}
 
 		setY(index, y) {
+			if (this.normalized) y = normalize(y, this.array);
 			this.data.array[index * this.data.stride + this.offset + 1] = y;
 			return this;
 		}
 
 		setZ(index, z) {
+			if (this.normalized) z = normalize(z, this.array);
 			this.data.array[index * this.data.stride + this.offset + 2] = z;
 			return this;
 		}
 
 		setW(index, w) {
+			if (this.normalized) w = normalize(w, this.array);
 			this.data.array[index * this.data.stride + this.offset + 3] = w;
 			return this;
 		}
 
 		getX(index) {
-			return this.data.array[index * this.data.stride + this.offset];
+			let x = this.data.array[index * this.data.stride + this.offset];
+			if (this.normalized) x = denormalize(x, this.array);
+			return x;
 		}
 
 		getY(index) {
-			return this.data.array[index * this.data.stride + this.offset + 1];
+			let y = this.data.array[index * this.data.stride + this.offset + 1];
+			if (this.normalized) y = denormalize(y, this.array);
+			return y;
 		}
 
 		getZ(index) {
-			return this.data.array[index * this.data.stride + this.offset + 2];
+			let z = this.data.array[index * this.data.stride + this.offset + 2];
+			if (this.normalized) z = denormalize(z, this.array);
+			return z;
 		}
 
 		getW(index) {
-			return this.data.array[index * this.data.stride + this.offset + 3];
+			let w = this.data.array[index * this.data.stride + this.offset + 3];
+			if (this.normalized) w = denormalize(w, this.array);
+			return w;
 		}
 
 		setXY(index, x, y) {
 			index = index * this.data.stride + this.offset;
+
+			if (this.normalized) {
+				x = normalize(x, this.array);
+				y = normalize(y, this.array);
+			}
+
 			this.data.array[index + 0] = x;
 			this.data.array[index + 1] = y;
 			return this;
@@ -21329,6 +21387,13 @@
 
 		setXYZ(index, x, y, z) {
 			index = index * this.data.stride + this.offset;
+
+			if (this.normalized) {
+				x = normalize(x, this.array);
+				y = normalize(y, this.array);
+				z = normalize(z, this.array);
+			}
+
 			this.data.array[index + 0] = x;
 			this.data.array[index + 1] = y;
 			this.data.array[index + 2] = z;
@@ -21337,6 +21402,14 @@
 
 		setXYZW(index, x, y, z, w) {
 			index = index * this.data.stride + this.offset;
+
+			if (this.normalized) {
+				x = normalize(x, this.array);
+				y = normalize(y, this.array);
+				z = normalize(z, this.array);
+				w = normalize(w, this.array);
+			}
+
 			this.data.array[index + 0] = x;
 			this.data.array[index + 1] = y;
 			this.data.array[index + 2] = z;
@@ -35807,3 +35880,4 @@
 	Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhyZWUuanMiLCJzb3VyY2VzIjpbXSwic291cmNlc0NvbnRlbnQiOltdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiIn0=
