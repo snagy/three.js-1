@@ -1989,8 +1989,6 @@ function WebGLRenderer( parameters = {} ) {
 
 		// uniforms.directionalShadowMap.needsUpdate = value;
 		uniforms.directionalShadowMatrix.needsUpdate = value;
-		// uniforms.spotShadowMap.needsUpdate = value;
-		uniforms.spotShadowMatrix.needsUpdate = value;
 		// uniforms.pointShadowMap.needsUpdate = value;
 		uniforms.pointShadowMatrix.needsUpdate = value;
 	}
