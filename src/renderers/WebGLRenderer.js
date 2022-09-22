@@ -997,7 +997,7 @@ function WebGLRenderer( parameters = {} ) {
 
 		if ( camera.parent === null && camera.matrixWorldAutoUpdate === true ) camera.updateMatrixWorld();
 
-		if ( xr.enabled === true && xr.isPresenting === true ) {
+		if ( xr.enabled === true && xr.isPresenting === true && camera.avoidXR !== true ) {
 
 			if ( xr.cameraAutoUpdate === true ) xr.updateCamera( camera );
 
@@ -1065,7 +1065,7 @@ function WebGLRenderer( parameters = {} ) {
 		if ( this.info.autoReset === true ) this.info.reset();
 
 		//
-		if ( xr.enabled === true && xr.isPresenting === true ) {
+		if ( xr.enabled === true && xr.isPresenting === true && camera.avoidXR !== true ) {
 
 			// do this after we render the shadow maps.
 			xr.setRenderTargets();

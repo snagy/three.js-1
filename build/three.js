@@ -11910,6 +11910,7 @@
 			const fov = 90;
 			const aspect = 1;
 			const cubeCamera = new PerspectiveCamera(fov, aspect, near, far);
+			cubeCamera.avoidXR = true;
 			const upSign = [1, -1, 1, 1, 1, 1];
 			const forwardSign = [1, 1, 1, -1, -1, -1];
 			const renderer = this._renderer;
@@ -11998,6 +11999,7 @@
 			_setViewport(cubeUVRenderTarget, 0, 0, 3 * size, 2 * size);
 
 			renderer.setRenderTarget(cubeUVRenderTarget);
+			_flatCamera.avoidXR = true;
 			renderer.render(mesh, _flatCamera);
 		}
 
@@ -12093,6 +12095,7 @@
 			_setViewport(targetOut, x, y, 3 * outputSize, 2 * outputSize);
 
 			renderer.setRenderTarget(targetOut);
+			_flatCamera.avoidXR = true;
 			renderer.render(blurMesh, _flatCamera);
 		}
 
@@ -20473,7 +20476,7 @@
 
 			if (camera.parent === null && camera.matrixWorldAutoUpdate === true) camera.updateMatrixWorld();
 
-			if (xr.enabled === true && xr.isPresenting === true) {
+			if (xr.enabled === true && xr.isPresenting === true && camera.avoidXR !== true) {
 				if (xr.cameraAutoUpdate === true) xr.updateCamera(camera);
 				camera = xr.getCamera(); // use XR camera for rendering
 			} //
@@ -20519,7 +20522,7 @@
 
 			if (this.info.autoReset === true) this.info.reset(); //
 
-			if (xr.enabled === true && xr.isPresenting === true) {
+			if (xr.enabled === true && xr.isPresenting === true && camera.avoidXR !== true) {
 				// do this after we render the shadow maps.
 				xr.setRenderTargets();
 			}
