@@ -20056,6 +20056,7 @@ function WebGLRenderer(parameters = {}) {
 		_this.extensions = extensions;
 		_this.properties = properties;
 		_this.renderLists = renderLists;
+		_this.cubeuvmaps = cubeuvmaps;
 		_this.shadowMap = shadowMap;
 		_this.state = state;
 		_this.info = info;
