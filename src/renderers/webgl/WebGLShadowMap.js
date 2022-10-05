@@ -320,7 +320,21 @@ function WebGLShadowMap( _renderer, _objects, _capabilities ) {
 
 		if ( visible && ( object.isMesh || object.isLine || object.isPoints ) ) {
 
-			if ( ( object.castShadow || ( object.receiveShadow && type === VSMShadowMap ) ) && ( ! object.frustumCulled || _frustum.intersectsObject( object ) ) ) {
+			let shouldDraw = ( object.castShadow || ( object.receiveShadow && type === VSMShadowMap ) );
+
+			if( shouldDraw ) {
+				if (object._cull) {
+					object._cull(_frustum);
+
+					if(object.count < 1) {
+						shouldDraw = false;
+					}
+				} else {
+					shouldDraw = ! object.frustumCulled || _frustum.intersectsObject( object );
+				}
+			}
+
+			if ( shouldDraw ) {
 
 				object.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, object.matrixWorld );
 

@@ -21135,7 +21135,21 @@ function WebGLShadowMap( _renderer, _objects, _capabilities ) {
 
 		if ( visible && ( object.isMesh || object.isLine || object.isPoints ) ) {
 
-			if ( ( object.castShadow || ( object.receiveShadow && type === VSMShadowMap ) ) && ( ! object.frustumCulled || _frustum.intersectsObject( object ) ) ) {
+			let shouldDraw = ( object.castShadow || ( object.receiveShadow && type === VSMShadowMap ) );
+
+			if( shouldDraw ) {
+				if (object._cull) {
+					object._cull(_frustum);
+
+					if(object.count < 1) {
+						shouldDraw = false;
+					}
+				} else {
+					shouldDraw = ! object.frustumCulled || _frustum.intersectsObject( object );
+				}
+			}
+
+			if ( shouldDraw ) {
 
 				object.modelViewMatrix.multiplyMatrices( shadowCamera.matrixWorldInverse, object.matrixWorld );
 
@@ -28130,16 +28144,6 @@ function WebGLRenderer( parameters = {} ) {
 
 		//
 
-		if ( _clippingEnabled === true ) clipping.beginShadows();
-
-		const shadowsArray = currentRenderState.state.shadowsArray;
-
-		shadowMap.render( shadowsArray, scene, camera );
-
-		if ( _clippingEnabled === true ) clipping.endShadows();
-
-		//
-
 		if ( this.info.autoReset === true ) this.info.reset();
 
 		//
@@ -28204,6 +28208,24 @@ function WebGLRenderer( parameters = {} ) {
 
 		textures.runDeferredUploads();
 		// _gl.finish();
+
+		//
+
+		// awful hack for flowerbed:
+		// projectObjects calls geometry.update, which updates the instanced mesh buffers.
+		// unfortunately, the shadowmaps update happens afterwards and overwrites those buffers if we do culling/lod there
+		// because we don't rely on per-frame shadows, we can draw our shadows at the end of the frame
+		// and cull our instance meshes properly for shadows
+		// (also, you can't run it before projectObjects because the shadow hasn't decided to draw yet)
+
+		if ( _clippingEnabled === true ) clipping.beginShadows();
+
+		const shadowsArray = currentRenderState.state.shadowsArray;
+
+		shadowMap.render( shadowsArray, scene, camera );
+
+		if ( _clippingEnabled === true ) clipping.endShadows();
+
 
 		bindingStates.resetDefaultState();
 		_currentMaterialId = - 1;
@@ -28303,7 +28325,7 @@ function WebGLRenderer( parameters = {} ) {
 				let shouldDraw = Array.isArray( material ) || material.visible;
 
 				if( shouldDraw ) {
-					if (object.isManagedInstancedMesh) {
+					if (object._cull) {
 						object._cull(_frustum);
 
 						if(object.count < 1) {
