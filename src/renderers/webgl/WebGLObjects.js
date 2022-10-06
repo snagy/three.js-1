@@ -11,7 +11,7 @@ function WebGLObjects( gl, geometries, attributes, info ) {
 
 		// Update once per frame
 
-		if ( updateMap.get( buffergeometry ) !== frame ) {
+		if ( object.isInstancedMesh || updateMap.get( buffergeometry ) !== frame ) {
 
 			geometries.update( buffergeometry );
 
