@@ -20523,11 +20523,13 @@
 
 			const previousDeferSetting = textures.deferTextureUploads;
 			textures.deferTextureUploads = false;
+			textures.resetTextureUnits();
+			const unit = textures.allocateTextureUnit();
 			boneTexturesToUpload.forEach(boneTexture => {
-				const unit = textures.allocateTextureUnit();
 				const textureProperties = properties.get(boneTexture);
 				textures.uploadTexture(textureProperties, boneTexture, unit);
 			});
+			textures.resetTextureUnits();
 			textures.deferTextureUploads = previousDeferSetting; //
 
 			if (this.info.autoReset === true) this.info.reset(); //
