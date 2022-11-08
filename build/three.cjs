@@ -20516,19 +20516,22 @@ function WebGLRenderer(parameters = {}) {
 
 		if (_this.sortObjects === true) {
 			currentRenderList.sort(_opaqueSort, _transparentSort);
-		} // upload bone textures recorded from last frame, after they are recalculated and updated
+		}
 
+		if (textures.deferTextureUploads) {
+			// upload bone textures recorded from last frame, after they are recalculated and updated
+			const previousDeferSetting = textures.deferTextureUploads;
+			textures.deferTextureUploads = false;
+			textures.resetTextureUnits();
+			const unit = textures.allocateTextureUnit();
+			boneTexturesToUpload.forEach(boneTexture => {
+				const textureProperties = properties.get(boneTexture);
+				textures.uploadTexture(textureProperties, boneTexture, unit);
+			});
+			textures.resetTextureUnits();
+			textures.deferTextureUploads = previousDeferSetting;
+		} //
 
-		const previousDeferSetting = textures.deferTextureUploads;
-		textures.deferTextureUploads = false;
-		textures.resetTextureUnits();
-		const unit = textures.allocateTextureUnit();
-		boneTexturesToUpload.forEach(boneTexture => {
-			const textureProperties = properties.get(boneTexture);
-			textures.uploadTexture(textureProperties, boneTexture, unit);
-		});
-		textures.resetTextureUnits();
-		textures.deferTextureUploads = previousDeferSetting; //
 
 		if (this.info.autoReset === true) this.info.reset(); //
 
@@ -21040,24 +21043,30 @@ function WebGLRenderer(parameters = {}) {
 			if (skeleton) {
 				if (capabilities.floatVertexTextures) {
 					if (skeleton.boneTexture === null) skeleton.computeBoneTexture();
-					const u = p_uniforms.map['boneTexture'];
 
-					if (u !== undefined) {
-						const cache = u.cache;
-						const unit = textures.allocateTextureUnit();
+					if (!textures.deferTextureUploads) {
+						p_uniforms.setValue(_gl, 'boneTexture', skeleton.boneTexture, textures);
+					} else {
+						const u = p_uniforms.map['boneTexture'];
 
-						if (cache[0] !== unit) {
-							_gl.uniform1i(u.addr, unit);
+						if (u !== undefined) {
+							const cache = u.cache;
+							const unit = textures.allocateTextureUnit();
 
-							cache[0] = unit;
-						}
+							if (cache[0] !== unit) {
+								_gl.uniform1i(u.addr, unit);
 
-						const textureProperties = properties.get(skeleton.boneTexture);
-						state.bindTextureToSlot(_gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture);
-					} // record the skeletons for bone texture uploads on the next frame before render
+								cache[0] = unit;
+							}
+
+							const textureProperties = properties.get(skeleton.boneTexture);
+							state.bindTextureToSlot(_gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture);
+						} // record the skeletons for bone texture uploads on the next frame before render
 
 
-					boneTexturesToUpload.push(skeleton.boneTexture);
+						boneTexturesToUpload.push(skeleton.boneTexture);
+					}
+
 					p_uniforms.setValue(_gl, 'boneTextureSize', skeleton.boneTextureSize);
 				} else {
 					console.warn('THREE.WebGLRenderer: SkinnedMesh can only be used with WebGL 2. With WebGL 1 OES_texture_float and vertex textures support is required.');

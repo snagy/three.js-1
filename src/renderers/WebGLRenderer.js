@@ -1037,23 +1037,25 @@ function WebGLRenderer( parameters = {} ) {
 
 		}
 
-		// upload bone textures recorded from last frame, after they are recalculated and updated
-		const previousDeferSetting = textures.deferTextureUploads;
-		textures.deferTextureUploads = false;
+		if( textures.deferTextureUploads ) {
+			// upload bone textures recorded from last frame, after they are recalculated and updated
+			const previousDeferSetting = textures.deferTextureUploads;
+			textures.deferTextureUploads = false;
 
-		textures.resetTextureUnits();
-		const unit = textures.allocateTextureUnit();
+			textures.resetTextureUnits();
+			const unit = textures.allocateTextureUnit();
 
-		boneTexturesToUpload.forEach( boneTexture => {
+			boneTexturesToUpload.forEach( boneTexture => {
 
-			const textureProperties = properties.get( boneTexture );
-			textures.uploadTexture( textureProperties, boneTexture, unit );
+				const textureProperties = properties.get( boneTexture );
+				textures.uploadTexture( textureProperties, boneTexture, unit );
 
-		} );
+			} );
 
-		textures.resetTextureUnits();
+			textures.resetTextureUnits();
 
-		textures.deferTextureUploads = previousDeferSetting;
+			textures.deferTextureUploads = previousDeferSetting;
+		}
 
 		//
 
@@ -1835,27 +1837,31 @@ function WebGLRenderer( parameters = {} ) {
 
 					if ( skeleton.boneTexture === null ) skeleton.computeBoneTexture();
 
+					if ( !textures.deferTextureUploads ) {
+						p_uniforms.setValue(_gl, 'boneTexture', skeleton.boneTexture, textures);
+					}
+					else {
+						const u = p_uniforms.map[ 'boneTexture' ];
+						if ( u !== undefined ) {
 
-					const u = p_uniforms.map[ 'boneTexture' ];
-					if ( u !== undefined ) {
+							const cache = u.cache;
+							const unit = textures.allocateTextureUnit();
 
-						const cache = u.cache;
-						const unit = textures.allocateTextureUnit();
+							if ( cache[ 0 ] !== unit ) {
 
-						if ( cache[ 0 ] !== unit ) {
+								_gl.uniform1i( u.addr, unit );
+								cache[ 0 ] = unit;
 
-							_gl.uniform1i( u.addr, unit );
-							cache[ 0 ] = unit;
+							}
+
+							const textureProperties = properties.get( skeleton.boneTexture );
+							state.bindTextureToSlot( _gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture );
 
 						}
 
-						const textureProperties = properties.get( skeleton.boneTexture );
-						state.bindTextureToSlot( _gl.TEXTURE0 + unit, _gl.TEXTURE_2D, textureProperties.__webglTexture );
-
+						// record the skeletons for bone texture uploads on the next frame before render
+						boneTexturesToUpload.push( skeleton.boneTexture );
 					}
-
-					// record the skeletons for bone texture uploads on the next frame before render
-					boneTexturesToUpload.push( skeleton.boneTexture );
 
 					p_uniforms.setValue( _gl, 'boneTextureSize', skeleton.boneTextureSize );
 
