@@ -2,11 +2,11 @@
  * @author fernandojsg / http://fernandojsg.com
  * @author Takahiro https://github.com/takahirox
  */
- import { Matrix3 } from '../../math/Matrix3.js';
- import { Matrix4 } from '../../math/Matrix4.js';
+import { Matrix3 } from '../../math/Matrix3.js';
+import { Matrix4 } from '../../math/Matrix4.js';
 
 
- class WebGLMultiview {
+class WebGLMultiview {
 
 	 constructor( renderer, extensions, gl ) {
 
@@ -96,6 +96,6 @@
 
 	 }
 
- }
+}
 
- export { WebGLMultiview };
+export { WebGLMultiview };

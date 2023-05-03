@@ -798,6 +798,7 @@ function WebGLProgram( renderer, cacheKey, parameters, bindingStates ) {
 		// Multiview
 
 		if ( numMultiviewViews > 0 ) {
+
 			// TODO: fix light transforms here?
 
 			prefixVertex = 	[
@@ -840,6 +841,7 @@ function WebGLProgram( renderer, cacheKey, parameters, bindingStates ) {
 			);
 
 		}
+
 	}
 
 	const vertexGlsl = versionString + prefixVertex + vertexShader;
